@@ -214,7 +214,7 @@
     mixed:{ t:"Mixed ability", d:"A core lesson plus tasks for students who are behind and ahead.", rec:true },
     stretch:{ t:"More challenge", d:"Extra thinking questions and open-ended tasks." }
   };
-  var S = { unit:UNITS[0], tt:{ perWeek:5, minutes:40, weeks:36, off:6 }, level:"mixed", saved:false, paid:false, org:"", meterSt:"free", version:1, changes:[], approved:false };
+  var S = { format:null, unit:UNITS[0], tt:{ perWeek:5, minutes:40, weeks:36, off:6 }, level:"mixed", saved:false, paid:false, org:"", meterSt:"free", version:1, changes:[], approved:false };
   function budget(){ var w = Math.max(0, S.tt.weeks - S.tt.off); return { weeks:w, periods:w * S.tt.perWeek }; }
 
   // ---------- steps (the rail) ----------
@@ -231,8 +231,10 @@
       note:"<b>2c · Must-ask: timetable (question 2).</b> The detected book details sit in one line at the top with an Edit link, so there is no separate confirm step. Periods per week, minutes per period, school weeks, exam and holiday weeks. Pre-filled defaults; the lesson count updates live and is compared with what the book needs. Saved once per book." },
     { id:"2d", t:"Difficulty",         go:function(){ ws(); difficulty(); },
       note:"<b>2d · Must-ask: difficulty level (question 7).</b> Four options; mixed ability recommended. The choice changes every lesson’s extra sections. Pick one, then <b>Continue</b>." },
-    { id:"2e", t:"Build 1st lesson",   go:function(){ build(); },
-      note:"<b>2e · Build the first lesson.</b> No chapter pick. <b>Decided:</b> the first lesson is always Unit 1, Day 1, for free and paid users alike. Runs without asking the admin anything." },
+    { id:"2e", t:"LP format (optional)", go:function(){ ws(); format(); },
+      note:"<b>2e · Optional: your lesson plan format.</b> The admin can upload a sample lesson plan or their school\u2019s template (PDF, Word, image or a Canva/Google Docs link) and we match its sections and style. <b>Never a blocker:</b> <b>Skip, use Rumi\u2019s format</b> is always one click; after an upload they can continue straight away while we finish reading it in the background. They can also add or change a format later from the review screen (3)." },
+    { id:"2f", t:"Build 1st lesson",   go:function(){ build(); },
+      note:"<b>2f · Build the first lesson.</b> No chapter pick. <b>Decided:</b> the first lesson is always Unit 1, Day 1, for free and paid users alike. Runs without asking the admin anything." },
     { id:"3",  t:"Review lesson",      go:function(){ review(); },
       note:"<b>3 · Review the lesson (everyone).</b> The admin approves it or asks for changes (tick boxes + free text), and we rewrite it as version 2. <b>Decided:</b> free users can rewrite too, with no limit here; it shows them the lessons we build can be edited. The approved lesson becomes the pattern for the whole book. Try the Free/Paid switch in this bar: after \u201cLooks good\u201d, free goes to 4, paid goes straight to 5." },
     { id:"4",  t:"Unlock (free only)", go:function(){ unlock(); },
@@ -402,17 +404,58 @@
     });
     var body = $("#ws-body"); body.innerHTML = '<div class="small" style="margin-bottom:12px">Used for every lesson in this book.</div>'; body.appendChild(g);
     body.appendChild(el("div", "actions", '<button type="button" class="btn primary" id="lv-ok">Continue</button>'));
-    $("#lv-ok").addEventListener("click", build);
+    $("#lv-ok").addEventListener("click", format);
   }
   function choose(k){
     S.level = k;
     [].forEach.call(document.querySelectorAll(".opt"), function(b, i){ b.setAttribute("aria-pressed", String(Object.keys(LEVELS)[i] === k)); });
   }
 
-  // ---------- 2e · build the first lesson ----------
+  // ---------- 2e · optional: the organisation's own lesson plan format ----------
+  // A sample the admin uploads is read for its sections; the lesson is then built in that shape.
+  var SAMPLE_FORMAT = { name:"Sample science lesson plan.pdf", pages:8,
+    sections:["Cover: age, topic, skills, time, summary","Overview for adults (the science behind it)","You will need (materials with pictures)","Teacher prep: practise the set-up first","Hook","Inform","Enable (guided exploration)","Reflect","Extend","Think & Talk / Investigate questions","Safety first","The world around us"] };
+  function format(){
+    mark("2e"); head("Step 2e · optional", "Do you have a lesson plan format you like?");
+    var body = $("#ws-body");
+    body.innerHTML = detectedLine() +
+      '<div class="small">Upload a sample lesson plan or your school\u2019s template and we\u2019ll build yours in the same shape. No sample? Skip, and we\u2019ll use Rumi\u2019s format. You can add one later.</div>' +
+      '<div class="grid2" style="margin-top:14px;align-items:start">' +
+        '<div><label class="upload" id="fmt-drop" for="fmt-in" style="max-width:none"><input id="fmt-in" type="file" accept=".pdf,.doc,.docx,image/*">' +
+          '<span class="ph ic"><span>\u2191</span></span><span><b>Upload a sample lesson plan</b><br><span class="small">PDF, Word or a photo of a page</span></span></label>' +
+          '<div class="field" style="margin-top:10px"><label for="fmt-link">Or paste a link</label><input id="fmt-link" placeholder="Canva or Google Docs link"><span class="err" hidden></span></div>' +
+          '<div class="small" style="margin-top:8px">No file handy? <button type="button" class="link" id="fmt-sample">Try a sample format</button></div></div>' +
+        '<div class="box" id="fmt-result" style="margin:0"><div class="sublabel">Rumi\u2019s format (default)</div>' +
+          '<ul class="clean"><li>Warm up</li><li>Opening</li><li>Explanation</li><li>Guided practice</li><li>Independent practice</li><li>Exit ticket</li><li>Homework</li></ul></div>' +
+      '</div>' +
+      '<div class="actions"><button type="button" class="btn" id="fmt-skip">Skip, use Rumi\u2019s format</button><button type="button" class="btn primary" id="fmt-go" hidden>Use this format</button></div>';
+    $("#fmt-skip").addEventListener("click", function(){ S.format = null; build(); });
+    $("#fmt-go").addEventListener("click", build);
+    $("#fmt-in").addEventListener("change", function(){ var f = this.files[0]; if (f) readFormat(f.name); this.value = ""; });
+    $("#fmt-sample").addEventListener("click", function(){ readFormat(SAMPLE_FORMAT.name); });
+    $("#fmt-link").addEventListener("change", function(){ var v = this.value.trim(), w = this.closest(".field"), e = w.querySelector(".err");
+      var ok = /^https?:\/\/\S+\.\S+/.test(v); w.classList.toggle("bad", !ok && !!v); e.hidden = ok || !v; e.textContent = "That doesn\u2019t look like a link"; if (ok) readFormat(v.replace(/^https?:\/\//, "").slice(0, 40) + "\u2026"); });
+  }
+  function readFormat(name){
+    S.format = { name:name, sections:null };
+    var r = $("#fmt-result");
+    r.innerHTML = '<div class="sublabel">Reading your format</div><b>' + esc(name) + '</b><div class="progress" style="margin-top:10px"><i id="fmt-bar"></i></div>' +
+      '<div class="small" style="margin-top:8px">You can continue now; we\u2019ll finish reading it while we build.</div>';
+    $("#fmt-go").hidden = false; $("#fmt-skip").textContent = "Skip, use Rumi\u2019s format";
+    var p = 0; (function t(){ p += 0.2; var b = $("#fmt-bar"); if (!b) return; b.style.width = Math.min(1, p) * 100 + "%"; if (p < 1) later(t, 300); else shown(); })();
+    function shown(){
+      S.format.sections = SAMPLE_FORMAT.sections;
+      if (!$("#fmt-result")) return;
+      $("#fmt-result").innerHTML = '<div class="sublabel">We found these sections</div><b>' + esc(name) + '</b>' +
+        '<ul class="clean" style="margin-top:8px">' + SAMPLE_FORMAT.sections.map(function(x){ return "<li>" + esc(x) + "</li>"; }).join("") + '</ul>' +
+        '<div class="small" style="margin-top:8px">We\u2019ll keep your timetable, difficulty level and the book\u2019s learning outcomes.</div>';
+    }
+  }
+
+  // ---------- 2f · build the first lesson ----------
   var FIRST = UNITS[0].L[0];
   function build(){
-    mark("2e"); ws(); head("Step 2e", "Building your first lesson");
+    mark("2f"); ws(); head("Step 2f", "Building your first lesson");
     var body = $("#ws-body");
     body.innerHTML = '<div class="small" style="margin-bottom:10px">Unit 1 · Day 1, the first lesson in the book. We build this one first so you can check it before we do the rest. Leave any time; we’ll email you when it’s ready.</div>' +
       '<div class="lrow"><div class="n">1</div><div><b>' + esc(FIRST[0]) + '</b><div class="small" id="st0">Queued</div></div><div class="progress"><i id="lb0"></i></div></div>';
@@ -444,13 +487,16 @@
       (S.version > 1 ? '<div class="changed"><b>Version ' + S.version + '</b> · changed: ' + esc(S.changes.join(", ")) + '<br>You can change any lesson we build like this, as many times as you need.</div>' : "") +
       '<div class="mono muted">UNIT 1 · DAY 1 · ' + S.tt.minutes + ' MIN · ' + esc(LEVELS[S.level].t.toUpperCase()) + '</div>' +
       '<h2 id="rv-title" style="margin-top:4px">' + esc(FIRST[0]) + '</h2><div class="small">' + esc(FIRST[1]) + ' · ' + esc(FIRST[2]) + ' · ' + esc(BOOK.title) + ', ' + esc(BOOK.grade) + '</div>' +
+      (S.format ? '<div class="changed"><b>Following your format</b> \u00b7 ' + esc(S.format.name) + '</div>' : '') +
       '<div class="ph" style="height:140px;margin-top:14px"><span>Lesson page preview</span></div>' +
+      (S.format ? (S.format.sections || SAMPLE_FORMAT.sections).map(function(h){ return "<h4>" + esc(h) + '</h4><p class="small" style="margin:0">(filled in for this lesson)</p>'; }).join("") :
       '<h4>Objectives</h4>' + list(DETAIL.obj) + '<h4>In class</h4>' + list(DETAIL.steps) +
-      '<h4>Worked exercise</h4><p style="margin:0">' + esc(DETAIL.ex) + '</p>' +
+      '<h4>Worked exercise</h4><p style="margin:0">' + esc(DETAIL.ex) + '</p>') +
       (EXTRA[S.level] || []).map(function(b){ return "<h4>" + b[0] + "</h4>" + list(b[1]); }).join("") + '</div>';
     var panel = '<div class="box" id="rv-panel"><h3>Does this lesson look right?</h3>' +
       '<p class="small" style="margin:6px 0 0">Every lesson we build for this book will follow this one’s format, level and length.</p>' +
       '<div class="actions" style="justify-content:flex-start"><button type="button" class="btn primary" id="rv-ok">Looks good</button><button type="button" class="btn" id="rv-change">Change something</button></div>' +
+      '<p class="small" style="margin:10px 0 0">' + (S.format ? 'Want a different layout? <button type="button" class="link" id="rv-fmt">Change the format</button>' : 'Have your own lesson plan format? <button type="button" class="link" id="rv-fmt">Upload a sample</button>') + '</p>' +
       '<div id="rv-form" hidden><div class="sublabel" style="margin-top:16px">What should change?</div><div class="chk">' +
       CHANGES.map(function(c, i){ return '<label><input type="checkbox" value="' + esc(c) + '" id="ch' + i + '"> ' + esc(c) + '</label>'; }).join("") +
       '</div><div class="field" style="margin-top:10px"><label for="rv-note">Anything else?</label><textarea id="rv-note" rows="3" placeholder="e.g. use examples from village life"></textarea><span class="err" hidden></span></div>' +
@@ -459,6 +505,7 @@
     $("#rv-ok").addEventListener("click", approve);
     $("#rv-change").addEventListener("click", function(){ $("#rv-form").hidden = false; $("#ch0").focus(); });
     $("#rv-redo").addEventListener("click", rewrite);
+    $("#rv-fmt").addEventListener("click", function(){ ws(); format(); });
   }
   function rewrite(){
     var picked = [].filter.call(document.querySelectorAll(".chk input"), function(c){ return c.checked; }).map(function(c){ return c.value; });
