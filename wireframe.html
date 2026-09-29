@@ -1,0 +1,541 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Curriculum Onboarding Wireframe</title>
+<style>
+  :root{
+    color-scheme: light;
+    --ink:#1F1F1F; --muted:#6B6B6B; --line:#BDBDBD; --soft:#E6E6E6; --fill:#F2F2F2; --page:#FAFAFA; --card:#FFFFFF;
+    --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+  *{ box-sizing:border-box; }
+  [hidden]{ display:none !important; }
+  body{ margin:0; background:var(--page); color:var(--ink); font-family:var(--sans); font-size:15px; line-height:1.5; }
+  button, input{ font:inherit; color:inherit; }
+  button{ cursor:pointer; }
+  :focus-visible{ outline:2px dashed var(--ink); outline-offset:2px; }
+  h1,h2,h3{ font-weight:600; text-wrap:balance; margin:0; }
+  .muted{ color:var(--muted); }
+  .small{ font-size:13px; color:var(--muted); }
+  .mono{ font-family:var(--mono); font-size:12px; letter-spacing:.04em; }
+
+  /* ---------- prototype chrome ---------- */
+  .proto{ position:sticky; top:env(safe-area-inset-top, 0px); z-index:50; background:#2B2B2B; color:#DDD; padding-inline:16px; padding-block:8px; display:flex; flex-wrap:wrap; gap:10px; align-items:center; font-size:12.5px; }
+  .proto b{ color:#fff; }
+  @media (max-width:640px){ .proto{ position:static; } .bar .muted{ display:none; } }
+  .rail{ display:flex; flex-wrap:wrap; gap:4px; }
+  .rail button{ border:1px solid #555; background:#3A3A3A; color:#DDD; border-radius:4px; padding:3px 8px; font-size:12px; }
+  .rail button[aria-current="step"]{ background:#fff; color:#111; border-color:#fff; }
+  .proto .sp{ flex:1; }
+  .proto label{ display:flex; gap:6px; align-items:center; cursor:pointer; }
+  .note{ max-width:1080px; margin:12px auto 0; padding-inline:16px; }
+  .note div{ border:1px dashed #999; background:#FFFFF0; padding:10px 14px; font-size:13.5px; border-radius:4px; }
+
+  /* ---------- wireframe primitives ---------- */
+  .wrap{ max-width:1080px; margin:0 auto; padding-inline:16px; }
+  .bar{ border-bottom:1px solid var(--line); background:var(--card); }
+  .bar .wrap{ height:56px; display:flex; align-items:center; gap:14px; }
+  .ph{ border:1px solid var(--line); background:
+      linear-gradient(to top right, transparent calc(50% - .5px), var(--line) 50%, transparent calc(50% + .5px)),
+      linear-gradient(to top left, transparent calc(50% - .5px), var(--line) 50%, transparent calc(50% + .5px)), var(--fill);
+    display:flex; align-items:center; justify-content:center; color:var(--muted); font-size:12.5px; text-align:center; }
+  .ph span{ background:var(--fill); padding:2px 8px; border-radius:3px; }
+  .logo{ width:96px; height:28px; }
+  .sp{ flex:1; }
+  .pill{ border:1px solid var(--line); border-radius:999px; padding:3px 10px; font-size:13px; background:var(--card); }
+  .box{ border:1px solid var(--line); background:var(--card); border-radius:6px; padding:20px; }
+  .box + .box{ margin-top:14px; }
+  .btn{ border:1px solid var(--ink); border-radius:6px; padding:10px 16px; font-weight:600; background:var(--card); }
+  .btn.primary{ background:var(--ink); color:#fff; }
+  .btn:disabled{ opacity:.4; cursor:not-allowed; }
+  .link{ background:none; border:0; padding:0; text-decoration:underline; text-underline-offset:3px; }
+  .row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+  .actions{ display:flex; gap:10px; justify-content:flex-end; flex-wrap:wrap; margin-top:16px; }
+  .grid2{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .grid3{ display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:12px; }
+  .grid4{ display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:12px; }
+  @media (max-width:760px){ .grid2, .grid3, .grid4{ grid-template-columns:1fr; } }
+  .field{ display:flex; flex-direction:column; gap:4px; }
+  .field label{ font-size:13px; font-weight:600; }
+  .field input{ border:1px solid var(--line); border-radius:4px; padding:9px 10px; background:#fff; }
+  .field.bad input{ border-color:var(--ink); border-width:2px; }
+  .field .err{ font-size:12.5px; }
+  .sublabel{ font-family:var(--mono); font-size:11.5px; letter-spacing:.06em; color:var(--muted); text-transform:uppercase; margin-bottom:6px; }
+  .progress{ height:8px; border:1px solid var(--line); border-radius:99px; overflow:hidden; background:#fff; }
+  .progress i{ display:block; height:100%; width:0; background:#9E9E9E; transition:width .25s; }
+  .opt{ text-align:left; border:1px solid var(--line); border-radius:6px; background:#fff; padding:12px 14px; }
+  .opt[aria-pressed="true"]{ border:2px solid var(--ink); padding:11px 13px; }
+  .opt b{ display:block; }
+  .opt:disabled{ cursor:default; }
+  .tag{ font-size:11px; border:1px solid var(--ink); border-radius:3px; padding:0 5px; margin-left:6px; font-weight:600; }
+  ul.clean{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:6px; }
+  ul.clean li{ border:1px solid var(--soft); border-radius:4px; padding:7px 10px; background:#fff; display:flex; justify-content:space-between; gap:10px; }
+
+  /* ---------- 1. home ---------- */
+  .home{ display:flex; flex-direction:column; align-items:center; text-align:center; padding-block:clamp(48px, 12vh, 120px); }
+  .home h1{ font-size:clamp(30px, 4.6vw, 48px); line-height:1.1; margin:6px 0 12px; }
+  .home > div{ display:flex; flex-direction:column; align-items:center; width:100%; }
+  .home h1{ max-width:18ch; }
+  .home p{ max-width:46ch; margin:0 0 22px; }
+  .upload{ width:100%; max-width:480px; display:flex; gap:14px; align-items:center; text-align:left; border:2px dashed var(--ink); border-radius:8px; padding:18px; background:#fff; position:relative; cursor:pointer; }
+  .upload.over{ background:var(--soft); }
+  .upload input{ position:absolute; width:1px; height:1px; opacity:0; }
+  .upload .ic{ width:44px; height:44px; flex:0 0 auto; }
+
+  /* ---------- 2. workspace ---------- */
+  .ws{ padding-block:20px 48px; }
+  .ws .actions{ justify-content:flex-start; }
+  .stepper{ border:1px solid var(--line); border-radius:6px; padding:10px; background:#fff; display:flex; flex-direction:column; gap:6px; }
+  .stepper label{ font-size:13px; font-weight:600; }
+  .ctl{ display:flex; align-items:center; gap:6px; }
+  .ctl button{ width:30px; height:30px; border:1px solid var(--ink); border-radius:4px; background:#fff; flex:0 0 auto; }
+  .ctl input{ width:100%; min-width:0; text-align:center; border:0; border-bottom:1px solid var(--line); font-size:20px; background:transparent; }
+  .sum{ margin-top:12px; border:1px solid var(--ink); border-radius:6px; padding:12px 14px; background:#fff; }
+  .lrow{ display:grid; grid-template-columns:28px minmax(0,1fr) 140px; gap:12px; align-items:center; border:1px solid var(--line); border-radius:6px; padding:10px 12px; background:#fff; }
+  .lrow .n{ width:26px; height:26px; border:1px solid var(--ink); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:600; }
+  .lrow.done .n{ background:var(--ink); color:#fff; }
+
+  /* ---------- 3. review / 4. unlock / 5. build ---------- */
+  .rv{ display:grid; grid-template-columns:minmax(0,1.5fr) minmax(0,1fr); gap:16px; align-items:start; }
+  .rv .box + .box{ margin-top:0; }
+  @media (max-width:860px){ .rv{ grid-template-columns:1fr; } }
+  .doc h4{ margin:16px 0 4px; font-size:12px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); }
+  .doc ul{ margin:0; padding-left:18px; }
+  .changed{ border:1px dashed var(--ink); border-radius:4px; padding:6px 10px; font-size:13px; margin-bottom:12px; background:var(--fill); }
+  .chk{ display:flex; flex-direction:column; gap:6px; }
+  .chk label{ display:flex; gap:8px; align-items:center; border:1px solid var(--line); border-radius:4px; padding:7px 10px; background:#fff; cursor:pointer; }
+  .field textarea{ border:1px solid var(--line); border-radius:4px; padding:9px 10px; font:inherit; resize:vertical; }
+  .field.bad textarea{ border:2px solid var(--ink); }
+  .toc details{ border:1px solid var(--line); border-radius:6px; background:#fff; }
+  .toc details + details{ margin-top:6px; }
+  .toc summary{ display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; padding:10px 12px; cursor:pointer; }
+  .toc ul{ margin:0; padding:0 12px 12px 32px; }
+  .proto select{ font-size:12px; border-radius:4px; padding:2px 4px; }
+  .savebar{ margin-top:16px; border:2px solid var(--ink); border-radius:6px; padding:14px 16px; background:#fff; display:flex; gap:12px; flex-wrap:wrap; align-items:center; }
+  .qrow{ display:grid; grid-template-columns:minmax(0,1fr) 160px 70px; gap:12px; align-items:center; font-size:14px; }
+  .qrow span{ text-align:right; color:var(--muted); font-variant-numeric:tabular-nums; }
+
+  .modal{ position:fixed; inset:0; z-index:80; background:rgba(0,0,0,.35); display:flex; align-items:center; justify-content:center; padding:16px; }
+  .sheet{ background:#fff; border:1px solid var(--ink); border-radius:8px; width:min(600px, 100%); max-height:88vh; overflow:auto; padding:22px 24px; position:relative; }
+  .sheet .x{ position:absolute; top:10px; right:10px; width:32px; height:32px; border:1px solid var(--line); border-radius:4px; background:#fff; }
+  .sheet h4{ margin:16px 0 4px; font-size:12px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); }
+  .sheet ul{ margin:0; padding-left:18px; }
+</style>
+
+<div class="proto" role="navigation" aria-label="Prototype controls">
+  <b>Wireframe · first-time flow</b>
+  <div class="rail" id="rail"></div>
+  <span class="sp"></span>
+  <label>User <select id="who"><option value="free">Free (first time)</option><option value="paid">Paid organisation</option></select></label>
+  <label><input type="checkbox" id="notes-on" checked> Notes</label>
+</div>
+<div class="note" id="note"><div id="note-t"></div></div>
+
+<header class="bar"><div class="wrap">
+  <div class="ph logo"><span>Logo</span></div><span class="muted">Curriculum for organisations</span>
+  <span class="sp"></span>
+  <span class="pill" id="meter" hidden>● 1 free lesson</span>
+  <button type="button" class="link" id="acct">Log in</button>
+</div></header>
+
+<main>
+  <!-- 1. HOME -->
+  <section data-screen="home">
+    <div class="wrap home">
+      <div>
+        <div class="mono muted">RUMI CURRICULUM</div>
+        <h1>Turn your textbook into a year of lesson plans.</h1>
+        <p>Drop in the book your teachers already use.</p>
+        <label class="upload" id="drop" for="book-in">
+          <input id="book-in" type="file" accept="application/pdf,.pdf">
+          <span class="ph ic"><span>↑</span></span>
+          <span><b>Upload your textbook</b><br><span class="small">Drop a PDF here or click to choose · up to 200 MB</span></span>
+        </label>
+        <div id="up-err" class="small" style="margin-top:8px"></div>
+        <div class="small" style="margin-top:10px">No PDF handy? <button type="button" class="link" id="use-sample">Try it with our sample book</button></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 1b. SIGN UP / LOG IN -->
+  <section data-screen="auth" hidden>
+    <div class="wrap" style="padding-block:32px 48px;max-width:560px" id="auth"></div>
+  </section>
+
+  <!-- 2. WORKSPACE -->
+  <section data-screen="ws" hidden>
+    <div class="wrap ws">
+      <div class="box">
+        <div class="sublabel" id="ws-sub"></div>
+        <h2 id="ws-title"></h2>
+        <div class="small" id="ws-file"></div>
+        <div id="ws-body" style="margin-top:14px"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. REVIEW -->
+  <section data-screen="review" hidden>
+    <div class="wrap" style="padding-block:24px 48px" id="review"></div>
+  </section>
+
+  <!-- 4. UNLOCK -->
+  <section data-screen="unlock" hidden>
+    <div class="wrap" style="padding-block:24px 48px" id="unlock"></div>
+  </section>
+</main>
+
+<div class="modal" id="modal" hidden><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title"><button type="button" class="x" id="modal-x" aria-label="Close">×</button><div id="sheet"></div></div></div>
+
+<script>
+(function(){
+  "use strict";
+  function $(q){ return document.querySelector(q); }
+  function el(t, c, h){ var e = document.createElement(t); if (c) e.className = c; if (h != null) e.innerHTML = h; return e; }
+  function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c]; }); }
+  var timers = [];
+  function later(fn, ms){ timers.push(setTimeout(fn, ms)); }
+  function clearTimers(){ timers.forEach(clearTimeout); timers = []; }
+
+  // ---------- content ----------
+  var BOOK = { file:"Nargis_Grade4_Urdu_Oxford.pdf · 38.4 MB", title:"Nargis (Urdu ka Guldasta)", grade:"Grade 4", subject:"Urdu", publisher:"Oxford University Press, 3rd edition" };
+  var UNITS = [
+    { n:1, t:"Health and hygiene", p:"p. 8", days:9, L:[["Uff, my teeth! (scene 1)","Reading and new words","pp. 14–15"],["The dentist visit (scene 2)","Comprehension","pp. 16–17"],["Quotation and question marks","Grammar and handwriting","pp. 18–20"]] },
+    { n:2, t:"Accidents and safety", p:"p. 26", days:10, L:[["The accident","Reading and new words","pp. 26–29"],["Opposites and plurals","Grammar and sounds","pp. 30–32"],["Safety signs","Reading instructions","pp. 44–46"]] },
+    { n:3, t:"Interviews", p:"p. 52", days:8, L:[["Quaid-e-Azam Museum House","Reading an interview","pp. 52–55"],["Alphabetical order and pronouns","Grammar","pp. 56–58"],["Plan your own interview","Speaking and writing","pp. 60–61"]] },
+    { n:4, t:"Seasons and weather", p:"p. 62", days:10 }, { n:5, t:"Self-confidence", p:"p. 96", days:9 }, { n:6, t:"Tales and fables", p:"p. 126", days:10 }
+  ];
+  UNITS.forEach(function(u){ if (!u.L) u.L = [[u.t + ": opening text","Reading",""],[u.t + ": language focus","Grammar",""],[u.t + ": write your own","Writing",""]]; });
+  var CONTENT_DAYS = UNITS.reduce(function(a, u){ return a + u.days; }, 0) + 6;
+  var BOOK_NEED = CONTENT_DAYS + UNITS.length * 2;
+  var LEVELS = {
+    book:{ t:"Follow the book", d:"Tasks at the level the book sets." },
+    support:{ t:"More support", d:"Smaller steps, more modelling, word banks, sentence starters." },
+    mixed:{ t:"Mixed ability", d:"A core lesson plus tasks for students who are behind and ahead.", rec:true },
+    stretch:{ t:"More challenge", d:"Extra thinking questions and open-ended tasks." }
+  };
+  var S = { unit:UNITS[0], tt:{ perWeek:5, minutes:40, weeks:36, off:6 }, level:"mixed", saved:false, paid:false, org:"", meterSt:"free", version:1, changes:[], approved:false };
+  function budget(){ var w = Math.max(0, S.tt.weeks - S.tt.off); return { weeks:w, periods:w * S.tt.perWeek }; }
+
+  // ---------- steps (the rail) ----------
+  var STEPS = [
+    { id:"1",  t:"Home",               go:function(){ home(); },
+      note:"<b>1 · Home.</b> One action: upload a textbook (or try the sample)." },
+    { id:"1b", t:"Sign up / log in",   go:function(){ S.pending = S.pending || BOOK.file; auth("signup"); },
+      note:"<b>1b · Sign up or log in (required).</b> Shown right after the admin picks a book, so they\u2019ve already committed before we ask. Creates the organisation\u2019s account; the admin can switch to log in. The book they picked carries through, so there\u2019s no second upload. Already signed in? This is skipped." },
+    { id:"2a", t:"Reading contents",   go:function(){ ws(); readToc(); },
+      note:"<b>2a · Reading the contents, then check the chapters.</b> We read only the table of contents first (seconds). The admin can open each unit to see its days, then clicks <b>Continue</b> as the confirmation. Nothing moves on by itself. If a detail is unclear, 2b appears instead." },
+    { id:"2b", t:"If unsure (fallback)", go:function(){ ws(); unsure(); },
+      note:"<b>2b · Fallback only: detection is unsure.</b> Not a normal step. Shown only when we can’t read a detail or two signals disagree (here: cover says Grade 4, contents mention Grade 5). We ask one targeted question on the page, then show the chapters (2a)." },
+    { id:"2c", t:"Timetable",          go:function(){ ws(); timetable(); },
+      note:"<b>2c · Must-ask: timetable (question 2).</b> The detected book details sit in one line at the top with an Edit link, so there is no separate confirm step. Periods per week, minutes per period, school weeks, exam and holiday weeks. Pre-filled defaults; the lesson count updates live and is compared with what the book needs. Saved once per book." },
+    { id:"2d", t:"Difficulty",         go:function(){ ws(); difficulty(); },
+      note:"<b>2d · Must-ask: difficulty level (question 7).</b> Four options; mixed ability recommended. The choice changes every lesson’s extra sections. Pick one, then <b>Continue</b>." },
+    { id:"2e", t:"Build 1st lesson",   go:function(){ build(); },
+      note:"<b>2e · Build the first lesson.</b> No chapter pick. <b>Decided:</b> the first lesson is always Unit 1, Day 1, for free and paid users alike. Runs without asking the admin anything." },
+    { id:"3",  t:"Review lesson",      go:function(){ review(); },
+      note:"<b>3 · Review the lesson (everyone).</b> The admin approves it or asks for changes (tick boxes + free text), and we rewrite it as version 2. <b>Decided:</b> free users can rewrite too, with no limit here; it shows them the lessons we build can be edited. The approved lesson becomes the pattern for the whole book. Try the Free/Paid switch in this bar: after \u201cLooks good\u201d, free goes to 4, paid goes straight to 5." },
+    { id:"4",  t:"Unlock (free only)", go:function(){ unlock(); },
+      note:"<b>4 · Free users stop here.</b> The approved lesson is saved to their account and can be downloaded as a PDF. To build the rest of the book: price placeholder + card. The lesson count comes from the timetable answer." },
+    { id:"5",  t:"Build the book (paid)", go:function(){ if (!S.paid) setWho("paid"); fullBuild(); },
+      note:"<b>5 · Paid only: build the rest of the book.</b> <b>Decided:</b> starts automatically once the first lesson is approved (and paid for) and runs all the way through, with no further check-ins. Progress per unit, total count, email when each unit is ready, add another book." }
+  ];
+  var cur = 0, rail = $("#rail");
+  STEPS.forEach(function(s, i){ var b = el("button", "", s.id + " " + s.t); b.type = "button"; b.addEventListener("click", function(){ goStep(i); }); rail.appendChild(b); });
+  function mark(id){
+    STEPS.forEach(function(s, i){ if (s.id === id) cur = i; });
+    [].forEach.call(rail.children, function(b, i){ if (i === cur) b.setAttribute("aria-current", "step"); else b.removeAttribute("aria-current"); });
+    $("#note-t").innerHTML = STEPS[cur].note;
+  }
+  function goStep(i){ clearTimers(); STEPS[i].go(); }
+  $("#notes-on").addEventListener("change", function(){ $("#note").hidden = !this.checked; });
+
+  function screen(name){
+    [].forEach.call(document.querySelectorAll("main > section"), function(s){ s.hidden = s.dataset.screen !== name; });
+    $("#meter").hidden = name === "home"; meter();
+    window.scrollTo(0, 0);
+  }
+  function meter(st){ if (st) S.meterSt = st; $("#meter").textContent = S.paid ? "Paid plan" : (S.meterSt === "used" ? "○ Free lesson used" : "● 1 free lesson"); }
+  function acct(){ $("#acct").textContent = S.saved ? S.org + " (admin)" : "Log in"; }
+  function setWho(v){
+    S.paid = v === "paid"; $("#who").value = v;
+    if (S.paid && !S.saved){ S.saved = true; S.org = "Example School"; }
+    acct(); meter();
+  }
+  $("#who").addEventListener("change", function(){ setWho(this.value); });
+
+  // ---------- 1 ----------
+  function home(){ mark("1"); screen("home"); }
+  var drop = $("#drop");
+  ["dragenter","dragover"].forEach(function(e){ drop.addEventListener(e, function(ev){ ev.preventDefault(); drop.classList.add("over"); }); });
+  ["dragleave","drop"].forEach(function(e){ drop.addEventListener(e, function(ev){ ev.preventDefault(); drop.classList.remove("over"); }); });
+  drop.addEventListener("drop", function(ev){ var f = ev.dataTransfer.files[0]; if (f) take(f); });
+  $("#book-in").addEventListener("change", function(){ var f = this.files[0]; if (f) take(f); this.value = ""; });
+  $("#use-sample").addEventListener("click", function(){ gate(BOOK.file); });
+  $("#acct").addEventListener("click", function(){ if (!S.saved){ S.pending = null; auth("login"); } });
+  function take(f){
+    if (!/\.pdf$/i.test(f.name) && f.type !== "application/pdf"){ $("#up-err").textContent = "Error state: “" + f.name + " isn’t a PDF. Please upload the textbook as a PDF.”"; return; }
+    if (f.size > 200 * 1048576){ $("#up-err").textContent = "Error state: “That file is over 200 MB. Try a smaller scan, or one volume at a time.”"; return; }
+    $("#up-err").textContent = "";
+    gate(f.name + " · " + (f.size / 1048576).toFixed(1) + " MB");
+  }
+  function gate(file){ if (S.saved) start(file); else { S.pending = file; auth("signup"); } }
+
+  // ---------- 1b · sign up / log in ----------
+  function auth(mode){
+    mark("1b"); screen("auth"); $("#meter").hidden = true;
+    var su = mode === "signup";
+    $("#auth").innerHTML = '<div class="box">' +
+      (S.pending ? '<div class="row" style="border:1px solid var(--line);border-radius:6px;padding:8px 12px;background:var(--fill);margin-bottom:16px"><div class="ph" style="width:28px;height:36px"><span></span></div><div style="flex:1" class="small"><b style="color:var(--ink)">' + esc(S.pending) + '</b><br>Ready to go once you\u2019re signed in.</div></div>' : '') +
+      '<h2 id="au-title">' + (su ? "Create your organisation\u2019s account" : "Log in") + '</h2>' +
+      '<div class="small">' + (su ? "You\u2019ll be the admin. Your first lesson plan is free." : "Welcome back.") + '</div>' +
+      '<form id="au" novalidate><div style="display:flex;flex-direction:column;gap:10px;margin-top:14px">' +
+      (su ? field("s-name", "Your name", "text", "name") : "") + field("s-mail", "Work email or phone", "text", "email") +
+      (su ? field("s-org", "Organisation", "text", "organization") : "") + field("s-pass", "Password", "password", su ? "new-password" : "current-password") +
+      '<button type="submit" class="btn primary">' + (su ? "Create account and continue" : "Log in and continue") + '</button></div></form>' +
+      '<p class="small" style="margin:14px 0 0">' + (su ? 'Already have an account? <button type="button" class="link" id="au-sw">Log in</button>' : 'New here? <button type="button" class="link" id="au-sw">Create an account</button>') + '</p></div>';
+    $("#au-sw").addEventListener("click", function(){ auth(su ? "login" : "signup"); });
+    $("#au").addEventListener("submit", function(e){
+      e.preventDefault();
+      var rules = [["s-mail", function(v){ return /@/.test(v) || v.replace(/\D/g, "").length >= 9; }, "Enter an email or phone"], ["s-pass", function(v){ return v.length >= 8; }, "At least 8 characters"]];
+      if (su) rules = [["s-name", function(v){ return v.length > 1; }, "Enter your name"]].concat(rules.slice(0, 1), [["s-org", function(v){ return v.length > 1; }, "Enter your organisation"]], rules.slice(1));
+      if (!check(rules)) return;
+      S.saved = true; S.org = su ? $("#s-org").value.trim() : "Example School"; acct();
+      if (S.pending){ var f = S.pending; S.pending = null; start(f); } else home();
+    });
+    var first = $("#au input"); if (first) first.focus();
+  }
+  function start(file){ BOOK.file = file; clearTimers(); S.version = 1; S.changes = []; S.approved = false; meter("free"); ws(); readToc(); }
+
+  // ---------- 2 ----------
+  function ws(){ screen("ws"); $("#ws-file").textContent = BOOK.file; }
+  function head(sub, title){ $("#ws-sub").textContent = sub; $("#ws-title").textContent = title; }
+
+  function readToc(){
+    mark("2a"); head("Step 2a", "Reading your book");
+    $("#ws-body").innerHTML = '<div class="grid2"><div><div class="small">Table of contents · pages read</div><div class="progress" style="margin-top:8px"><i id="p"></i></div></div><div><div class="small">Chapters found</div><ul class="clean" id="toc" style="margin-top:8px"></ul></div></div>';
+    var i = 0;
+    (function tick(){
+      if (i < UNITS.length){ var u = UNITS[i++]; $("#toc").appendChild(el("li", "", esc("Unit " + u.n + " · " + u.t) + '<span class="small">' + u.p + '</span>')); $("#p").style.width = (i / UNITS.length * 100) + "%"; later(tick, 380); return; }
+      later(chapters, 400);
+    })();
+  }
+
+  function chapters(){
+    mark("2a"); head("Step 2a", "Here\u2019s what\u2019s in your book");
+    var body = $("#ws-body");
+    body.innerHTML = '<div class="small" style="margin-bottom:12px">We found ' + UNITS.length + ' units in ' + esc(BOOK.title) + '. Open any unit to see what we\u2019ll teach in it, then continue.</div><div class="toc" id="toc2"></div>' +
+      '<div class="actions"><button type="button" class="btn primary" id="toc-ok">Continue</button></div>';
+    UNITS.forEach(function(u){
+      var d = el("details", "", '<summary><b>Unit ' + u.n + ' · ' + esc(u.t) + '</b><span class="small">starts ' + u.p + ' · about ' + u.days + ' teaching days</span></summary>' +
+        '<ul>' + u.L.map(function(l, i){ return '<li>Day ' + (i + 1) + ' · ' + esc(l[0]) + (l[2] ? ' <span class="small">(' + esc(l[2]) + ')</span>' : '') + '</li>'; }).join('') + '<li class="small">+ ' + (u.days - u.L.length) + ' more days</li></ul>');
+      $("#toc2").appendChild(d);
+    });
+    $("#toc-ok").addEventListener("click", timetable);
+    $("#toc-ok").focus();
+  }
+
+  // Fallback only: shown when detection is low-confidence, never as a routine step.
+  function unsure(){
+    mark("2b"); head("Step 2b · fallback", "One detail we couldn’t be sure of");
+    $("#ws-body").innerHTML = '<ul class="clean">' +
+      '<li>Cover<span class="small">“Grade 4”</span></li>' +
+      '<li>Table of contents, p. 3<span class="small">“Grade 5 learning outcomes”</span></li></ul>' +
+      '<p style="margin:16px 0 0"><b>Which grade is this book for?</b></p>' +
+      '<div class="actions"><button type="button" class="btn" data-g="Grade 4">Grade 4</button><button type="button" class="btn" data-g="Grade 5">Grade 5</button></div>';
+    [].forEach.call(document.querySelectorAll("[data-g]"), function(b){ b.addEventListener("click", function(){ BOOK.grade = b.dataset.g; chapters(); }); });
+  }
+
+  function detectedLine(){
+    return '<div class="row" style="border:1px solid var(--line);border-radius:6px;padding:8px 12px;background:var(--fill);margin-bottom:14px">' +
+      '<div class="ph" style="width:28px;height:36px"><span></span></div>' +
+      '<div style="flex:1"><b>' + esc(BOOK.title) + '</b> · ' + esc(BOOK.grade) + ' · ' + esc(BOOK.subject) + ' · ' + UNITS.length + ' units</div>' +
+      '<button type="button" class="link" id="edit-book">Edit</button></div>';
+  }
+  function editBook(){
+    open('<h3 id="sheet-title">Book details</h3><div class="small">We read these from your PDF. Fix anything that’s wrong.</div>' +
+      '<form id="eb" novalidate><div class="grid2" style="margin-top:12px">' +
+      field("b-title", "Title", "text", "off") + field("b-grade", "Grade", "text", "off") +
+      field("b-subj", "Subject", "text", "off") + field("b-pub", "Publisher and edition", "text", "off") +
+      '</div><div class="actions"><button type="button" class="btn" data-close>Cancel</button><button type="submit" class="btn primary">Save</button></div></form>');
+    [["b-title","title"],["b-grade","grade"],["b-subj","subject"],["b-pub","publisher"]].forEach(function(p){ $("#" + p[0]).value = BOOK[p[1]]; });
+    $("#eb").addEventListener("submit", function(e){
+      e.preventDefault();
+      if (!check([["b-title", function(v){ return v.length > 0; }, "Enter the title"], ["b-grade", function(v){ return v.length > 0; }, "Enter the grade"], ["b-subj", function(v){ return v.length > 0; }, "Enter the subject"]])) return;
+      BOOK.title = $("#b-title").value.trim(); BOOK.grade = $("#b-grade").value.trim(); BOOK.subject = $("#b-subj").value.trim(); BOOK.publisher = $("#b-pub").value.trim();
+      close(); timetable();
+    });
+  }
+
+  var TT = [["perWeek","Periods per week (this subject)",1,10,1,""],["minutes","Minutes per period",20,80,5,"min"],["weeks","Weeks in the school year",20,52,1,"wks"],["off","Exam and holiday weeks",0,20,1,"wks"]];
+  function timetable(){
+    mark("2c"); head("Step 2c · must ask", "Your timetable");
+    var body = $("#ws-body");
+    body.innerHTML = detectedLine() + '<div class="small">We\u2019ve filled in a typical year; change anything that\u2019s different. This sets how many lesson plans the year gets, and is saved for this book.</div><div class="grid4" id="tt" style="margin-top:12px"></div><div class="sum" id="sum"></div><div class="actions"><button type="button" class="btn primary" id="tt-ok">Use this timetable</button></div>';
+    TT.forEach(function(f){
+      var b = el("div", "stepper", '<label for="tt-' + f[0] + '">' + f[1] + '</label><div class="ctl"><button type="button" aria-label="Less">−</button><input id="tt-' + f[0] + '" inputmode="numeric" value="' + S.tt[f[0]] + '"><span class="small">' + f[5] + '</span><button type="button" aria-label="More">+</button></div>');
+      var inp = b.querySelector("input"), bs = b.querySelectorAll("button");
+      function set(v){ v = Math.max(f[2], Math.min(f[3], Math.round(+v || 0))); S.tt[f[0]] = v; inp.value = v; paint(); }
+      bs[0].addEventListener("click", function(){ set(S.tt[f[0]] - f[4]); });
+      bs[1].addEventListener("click", function(){ set(S.tt[f[0]] + f[4]); });
+      inp.addEventListener("change", function(){ set(inp.value); });
+      $("#tt").appendChild(b);
+    });
+    function paint(){
+      var b = budget(), fit = b.periods >= BOOK_NEED * 1.25 ? "Plenty of room: we’ll add practice days to fill it."
+        : b.periods >= BOOK_NEED ? "A good fit, with a little room for practice." : "Tight: we’ll combine the shortest lessons so the whole book fits.";
+      $("#sum").innerHTML = "<b>" + b.weeks + "</b> teaching weeks × <b>" + S.tt.perWeek + "</b> periods = <b>" + b.periods + " lessons a year</b>, " + S.tt.minutes + " min each.<br><span class=\"small\">The book needs about " + BOOK_NEED + " (content + a revision and an assessment day per unit). " + fit + "</span>";
+    }
+    paint();
+    $("#tt-ok").addEventListener("click", difficulty);
+    $("#edit-book").addEventListener("click", editBook);
+  }
+
+  function difficulty(){
+    mark("2d"); head("Step 2d · must ask", "How challenging should the lessons be?");
+    var g = el("div", "grid2");
+    Object.keys(LEVELS).forEach(function(k){
+      var L = LEVELS[k], b = el("button", "opt", "<b>" + L.t + (L.rec ? '<span class="tag">Recommended</span>' : "") + '</b><span class="small">' + L.d + "</span>");
+      b.type = "button"; b.setAttribute("aria-pressed", String(S.level === k));
+      b.addEventListener("click", function(){ choose(k); });
+      g.appendChild(b);
+    });
+    var body = $("#ws-body"); body.innerHTML = '<div class="small" style="margin-bottom:12px">Used for every lesson in this book.</div>'; body.appendChild(g);
+    body.appendChild(el("div", "actions", '<button type="button" class="btn primary" id="lv-ok">Continue</button>'));
+    $("#lv-ok").addEventListener("click", build);
+  }
+  function choose(k){
+    S.level = k;
+    [].forEach.call(document.querySelectorAll(".opt"), function(b, i){ b.setAttribute("aria-pressed", String(Object.keys(LEVELS)[i] === k)); });
+  }
+
+  // ---------- 2e · build the first lesson ----------
+  var FIRST = UNITS[0].L[0];
+  function build(){
+    mark("2e"); ws(); head("Step 2e", "Building your first lesson");
+    var body = $("#ws-body");
+    body.innerHTML = '<div class="small" style="margin-bottom:10px">Unit 1 · Day 1, the first lesson in the book. We build this one first so you can check it before we do the rest. Leave any time; we’ll email you when it’s ready.</div>' +
+      '<div class="lrow"><div class="n">1</div><div><b>' + esc(FIRST[0]) + '</b><div class="small" id="st0">Queued</div></div><div class="progress"><i id="lb0"></i></div></div>';
+    var STAGES = [["Page-Truth","Reading pages"],["Segment","Planning the day"],["Validate","Checking outcomes"],["Enrich","Solving exercises"],["Slide-Script","Writing the lesson"],["Render","Designing pages"]];
+    var k = 0;
+    function prog(p, label){ $("#lb0").style.width = Math.min(1, p) * 100 + "%"; $("#st0").textContent = p >= 1 ? "Ready" : label; if (p >= 1) $("#lb0").closest(".lrow").classList.add("done"); }
+    (function next(){
+      if (k === STAGES.length){ prog(1, ""); built(); return; }
+      var s = STAGES[k]; prog((k + 0.5) / STAGES.length, s[1]);
+      k++; later(next, 900);
+    })();
+  }
+  function built(){
+    if (!S.paid) meter("used");
+    $("#ws-body").appendChild(el("div", "actions", '<button type="button" class="btn primary" id="see">Review the lesson</button>'));
+    $("#see").addEventListener("click", review);
+  }
+
+  // ---------- 3 · review ----------
+  var DETAIL = { obj:["Read the opening scene aloud","Learn six new words"], steps:["Warm-up (5 min)","New words (15 min)","Paired reading (15 min)","Check (5 min)"], ex:"Use “dentist” in a sentence." };
+  var EXTRA = { support:[["Extra support",["Model the first answer aloud","Word bank on the board","Sentence starters"]]],
+    mixed:[["For students who are behind",["Pair with a confident reader","Answer 3 of the 5 questions"]],["For students who are ahead",["Write a question for a partner","Retell the scene in 4 sentences"]]],
+    stretch:[["Stretch",["Why did the writer choose this ending?","Continue the scene as a dialogue"]]] };
+  var CHANGES = ["Shorter activities","More speaking practice","Simpler language","Add homework"];
+  function list(a){ return "<ul>" + a.map(function(x){ return "<li>" + esc(x) + "</li>"; }).join("") + "</ul>"; }
+  function review(){
+    mark("3"); screen("review"); if (!S.paid) meter("used");
+    var doc = '<div class="box doc">' +
+      (S.version > 1 ? '<div class="changed"><b>Version ' + S.version + '</b> · changed: ' + esc(S.changes.join(", ")) + '<br>You can change any lesson we build like this, as many times as you need.</div>' : "") +
+      '<div class="mono muted">UNIT 1 · DAY 1 · ' + S.tt.minutes + ' MIN · ' + esc(LEVELS[S.level].t.toUpperCase()) + '</div>' +
+      '<h2 id="rv-title" style="margin-top:4px">' + esc(FIRST[0]) + '</h2><div class="small">' + esc(FIRST[1]) + ' · ' + esc(FIRST[2]) + ' · ' + esc(BOOK.title) + ', ' + esc(BOOK.grade) + '</div>' +
+      '<div class="ph" style="height:140px;margin-top:14px"><span>Lesson page preview</span></div>' +
+      '<h4>Objectives</h4>' + list(DETAIL.obj) + '<h4>In class</h4>' + list(DETAIL.steps) +
+      '<h4>Worked exercise</h4><p style="margin:0">' + esc(DETAIL.ex) + '</p>' +
+      (EXTRA[S.level] || []).map(function(b){ return "<h4>" + b[0] + "</h4>" + list(b[1]); }).join("") + '</div>';
+    var panel = '<div class="box" id="rv-panel"><h3>Does this lesson look right?</h3>' +
+      '<p class="small" style="margin:6px 0 0">Every lesson we build for this book will follow this one’s format, level and length.</p>' +
+      '<div class="actions" style="justify-content:flex-start"><button type="button" class="btn primary" id="rv-ok">Looks good</button><button type="button" class="btn" id="rv-change">Change something</button></div>' +
+      '<div id="rv-form" hidden><div class="sublabel" style="margin-top:16px">What should change?</div><div class="chk">' +
+      CHANGES.map(function(c, i){ return '<label><input type="checkbox" value="' + esc(c) + '" id="ch' + i + '"> ' + esc(c) + '</label>'; }).join("") +
+      '</div><div class="field" style="margin-top:10px"><label for="rv-note">Anything else?</label><textarea id="rv-note" rows="3" placeholder="e.g. use examples from village life"></textarea><span class="err" hidden></span></div>' +
+      '<div class="actions" style="justify-content:flex-start"><button type="button" class="btn primary" id="rv-redo">Rewrite the lesson</button></div></div></div>';
+    $("#review").innerHTML = '<div class="rv">' + doc + panel + '</div>';
+    $("#rv-ok").addEventListener("click", approve);
+    $("#rv-change").addEventListener("click", function(){ $("#rv-form").hidden = false; $("#ch0").focus(); });
+    $("#rv-redo").addEventListener("click", rewrite);
+  }
+  function rewrite(){
+    var picked = [].filter.call(document.querySelectorAll(".chk input"), function(c){ return c.checked; }).map(function(c){ return c.value; });
+    var note = $("#rv-note").value.trim(), w = $("#rv-note").closest(".field"), e = w.querySelector(".err");
+    if (note) picked.push("“" + note + "”");
+    w.classList.toggle("bad", !picked.length); e.hidden = !!picked.length; e.textContent = "Tick at least one change or write one";
+    if (!picked.length) return;
+    S.changes = picked; S.version++;
+    $("#rv-panel").innerHTML = '<h3>Rewriting…</h3><div class="progress" style="margin-top:12px"><i id="rw"></i></div><p class="small">Applying: ' + esc(picked.join(", ")) + '</p>';
+    var p = 0; (function t(){ p += 0.25; $("#rw").style.width = Math.min(1, p) * 100 + "%"; if (p < 1) later(t, 350); else later(review, 300); })();
+  }
+  function approve(){
+    S.approved = true;
+    if (S.paid) fullBuild(); else unlock();
+  }
+
+  // ---------- account + card helpers ----------
+  function field(id, label, type, ac){ return '<div class="field"><label for="' + id + '">' + label + '</label><input id="' + id + '" type="' + type + '" autocomplete="' + ac + '"><span class="err" hidden></span></div>'; }
+  function check(rules){
+    var ok = true;
+    rules.forEach(function(r){ var f = $("#" + r[0]), w = f.closest(".field"), good = r[1](f.value.trim()), e = w.querySelector(".err"); w.classList.toggle("bad", !good); e.hidden = good; e.textContent = r[2]; if (!good && ok){ f.focus(); ok = false; } });
+    return ok;
+  }
+  // ---------- 4 · unlock (free users only) ----------
+  function unlock(){
+    if (S.paid){ setWho("free"); }
+    mark("4"); screen("unlock"); meter("used");
+    var b = budget();
+    $("#unlock").innerHTML =
+      '<div class="savebar" style="margin:0 0 16px"><div style="flex:1"><b>Your free lesson is approved</b><div class="small">Saved to ' + esc(S.org || "your account") + '.</div></div>' +
+      '<button type="button" class="btn" id="dl">Download PDF</button></div>' +
+      '<div class="grid2">' +
+      '<div class="box" style="margin:0"><h2>Build the rest of the book</h2>' +
+        '<p>Your timetable gives <b>' + b.periods + ' lessons a year</b> for ' + esc(BOOK.title.split(" (")[0]) + '. We’ll build the other <b>' + (b.periods - 1) + '</b>, all following the lesson you approved (' + S.tt.minutes + ' min, ' + LEVELS[S.level].t.toLowerCase() + ').</p>' +
+        '<div class="box" style="border-width:2px;border-color:var(--ink)"><div class="small">Organisation plan</div><div style="font-size:24px;font-weight:600">Price TBD</div><ul><li>Every lesson for this book</li><li>Any other textbook</li><li>Audio and sending to teachers on WhatsApp</li></ul></div></div>' +
+      '<form class="box" id="pay" novalidate style="margin:0"><h3>Pay by card</h3><div style="display:flex;flex-direction:column;gap:10px;margin-top:10px">' +
+        field("c-name", "Name on card", "text", "cc-name") + field("c-num", "Card number", "text", "cc-number") +
+        '<div class="grid2">' + field("c-exp", "Expiry (MM/YY)", "text", "cc-exp") + field("c-cvc", "CVC", "text", "cc-csc") + '</div>' +
+        '<button type="submit" class="btn primary">Pay and build the book</button><div class="small">Prototype: nothing is charged.</div></div></form></div>';
+    $("#dl").addEventListener("click", function(){ this.disabled = true; this.textContent = "PDF downloaded"; });
+    $("#pay").addEventListener("submit", function(e){
+      e.preventDefault();
+      if (!check([["c-name", function(v){ return v.length > 1; }, "Enter the name on the card"], ["c-num", function(v){ return v.replace(/\D/g, "").length >= 12; }, "Enter a valid card number"], ["c-exp", function(v){ return /^\d{2}\s*\/\s*\d{2}$/.test(v); }, "Use MM/YY"], ["c-cvc", function(v){ return /^\d{3,4}$/.test(v); }, "3 or 4 digits"]])) return;
+      setWho("paid"); fullBuild();
+    });
+  }
+
+  // ---------- 5 · build the rest of the book (paid only) ----------
+  function fullBuild(){
+    mark("5"); screen("unlock");
+    var b = budget(), sum = UNITS.reduce(function(a, u){ return a + u.days; }, 0), left = b.periods;
+    var counts = UNITS.map(function(u, i){ var n = i === UNITS.length - 1 ? left : Math.round(b.periods * u.days / sum); left -= n; return n; });
+    $("#unlock").innerHTML = '<div class="box"><h2>Building ' + esc(BOOK.title.split(" (")[0]) + '</h2>' +
+      '<div class="small">' + b.periods + ' lessons · ' + S.tt.minutes + ' min · ' + esc(LEVELS[S.level].t) + ' · following your approved lesson' + (S.version > 1 ? " (version " + S.version + ")" : "") + '</div>' +
+      '<div class="sum" id="tot"></div>' +
+      '<div class="small" style="margin-top:12px">We’ll email you as each unit is ready. You can leave this page.</div>' +
+      '<div id="rows" style="display:flex;flex-direction:column;gap:8px;margin-top:10px"></div>' +
+      '<div class="actions" style="justify-content:flex-start"><button type="button" class="btn" id="add">+ Add another book</button></div></div>';
+    UNITS.forEach(function(u, i){ $("#rows").appendChild(el("div", "qrow", "<div>Unit " + u.n + " · " + esc(u.t) + '</div><div class="progress"><i id="qb' + i + '"></i></div><span id="qs' + i + '"></span>')); });
+    $("#add").addEventListener("click", home);
+    var t = 0;
+    (function tick(){
+      var total = 0;
+      UNITS.forEach(function(u, i){ var d = Math.max(0, Math.min(counts[i], Math.floor((t - i * 3) * counts[i] / 10))); if (i === 0) d = Math.max(d, 1); total += d; $("#qb" + i).style.width = d / counts[i] * 100 + "%"; $("#qs" + i).textContent = d + " / " + counts[i]; });
+      $("#tot").innerHTML = "<b>" + total + " of " + b.periods + "</b> lessons ready";
+      t++; if (total < b.periods) later(tick, 300);
+    })();
+  }
+
+  // ---------- modal ----------
+  var modal = $("#modal"), last = null;
+  function open(h){ last = document.activeElement; $("#sheet").innerHTML = h; modal.hidden = false; var f = modal.querySelector("input, .actions button"); if (f) f.focus(); }
+  function close(){ modal.hidden = true; if (last && last.focus) last.focus(); }
+  $("#modal-x").addEventListener("click", close);
+  modal.addEventListener("click", function(e){ if (e.target === modal || e.target.hasAttribute("data-close")) close(); });
+  document.addEventListener("keydown", function(e){ if (e.key === "Escape" && !modal.hidden) close(); });
+
+  home();
+})();
+</script>
